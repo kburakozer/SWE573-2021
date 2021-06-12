@@ -6,11 +6,14 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import FormView, CreateView
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, TrigramSimilarity, TrigramDistance
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from .forms import Tag_form
 # Create your views here.
 
-def index(request):
-    return HttpResponse("Hello my friend")
+# def index(request):
+#     return HttpResponse("Hello my friend")
 
 
 class IndexClassView(ListView):
@@ -45,20 +48,7 @@ class Search(ListView):
         
         return object_list
 
-
-# class Tag_view(CreateView):
-#     model = Tag
-#     template_name = "document/tagging.html"
-#     form_class = Tag_form
-#     success_url='/search/'
-
-#     def form_valid(self, doc_id):
-#         document = Document.objects.get(pk=doc_id)
-#         tag = Tag.objects
-#         tag.save() 
-#         document.tags.add(tag)
-#         return self
-        
+@login_required      
 def Tag_view(request, doc_id):
     if request.method =='POST':
         form = Tag_form(request.POST)
@@ -109,4 +99,18 @@ def Tag_view(request, doc_id):
     else:
         form = Tag_form()
 
-    return render(request, 'document/tagging.html', {'form': form, 'doc_id': doc_id})  
+    return render(request, 'document/tagging.html', {'form': form, 'doc_id': doc_id})
+
+
+def register(request):
+    #form = UserCreationForm()
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form. cleaned_data.get('username')
+            messages.success(request, f'Welcome {username}')
+            return redirect('document:login')
+    else:
+        form = UserCreationForm()
+    return render(request,'document/register.html', {'form':form})
