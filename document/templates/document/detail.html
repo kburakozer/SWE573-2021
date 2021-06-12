@@ -1,0 +1,82 @@
+
+{% extends 'document/base.html' %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+
+<body>
+
+    {% block body %}
+<br>
+<br>
+    <div class="row">
+        <div class="col-md-4 offset-md-4">
+            <h4>{{ object.title  }}</h4>
+        </div>
+        <div class="col-md-1">
+            <!-- <a href="/tag/{{ object.doc_id  }}" class="btn">Tag</a> -->
+            <button type="button"><a href="/tag/{{object.doc_id}}">Add Tag</a></button>
+        </div>
+    </div>
+    <div class="row">
+        
+        <div class="col-md-4 offset-md-4">
+            <h6>{{ object.author }}</h6>
+            <h6>{{ object.year }}</h6>
+            <h7>PMID: {{ object.doc_id  }}</h7>
+            <br>
+            <h7>Doi: {{ object.doi }}</h7>
+            <br>
+            <br>
+
+            <h7>Tags: </h7>
+            {% for item in object.tags.all  %}
+
+            <h7>{{ item.tag_name }}</h7>
+  
+            {% endfor %}
+            <br>
+            <br>
+        </div>
+    
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-4 offset-md-4">
+            <h7>{{ object.abstract }}</h7>
+        </div>
+    
+    </div>
+
+
+    {% endblock %}
+</body>
+</html>
+
+
+
+
+
+
+<!-- 
+<ul>
+    <li>
+        <h4>{{ object.title  }}</h4>
+        
+        <h7>{{ object.author }}</h7>
+        <h7>{{ object.year }}</h7>
+        <br>
+        <br>
+        <h7>{{ object.abstract }}</h7>
+        <br>
+        <br>
+    </li>
+</ul> -->

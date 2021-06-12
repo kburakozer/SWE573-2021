@@ -1,0 +1,60 @@
+
+{% extends 'document/base.html' %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+
+<body>
+
+    {% block body %}
+    {% for item in document_list  %}
+    <div class="row">
+        <br>
+        <div class="col-md-4 offset-md-4">
+            <br>
+            <a href="{% url 'document:detail' item.id %}">{{ item.title }}</a>
+           
+        </div>
+        <br>
+
+    </div>
+    <div class="row">
+        <div class="col-md-4 offset-md-4">
+            <h7>{{ item.author }}</h7>
+            <h7>{{ item.year }}</h7>
+        </div>
+
+    </div>
+    <br>
+    {% endfor  %}
+
+
+    
+    {% if is_paginated %}
+        <nav aria-label="Page navigation conatiner"></nav>
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            
+            <li><a href="?page={{ page_obj.previous_page_number }}" class="page-link">&laquo; PREV </a>
+            {% endif %}
+            {% if page_obj.has_next %}
+            
+            <li><a href="?page={{ page_obj.next_page_number }}" class="page-link"> NEXT &raquo;</a></li>
+            {% endif %}
+        </ul>
+        </nav>
+        </div>
+    {% endif %}
+
+    {% endblock %}
+</body>
+</html>
+

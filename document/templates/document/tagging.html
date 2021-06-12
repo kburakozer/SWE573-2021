@@ -1,0 +1,23 @@
+{% extends 'document/base.html' %}
+
+
+{% block body %}
+
+<form method="POST">
+    {% csrf_token %}
+    {{form}}
+    {{doc_id}}
+   <br>
+    <button type="submit">Save</button>
+    
+</form>
+
+
+
+<!-- <form method="POST">
+    {% csrf_token %}
+    <input type="hidden" value="{{ item.id }}" name="tag_id">
+    <button type="Submit">X</button>
+</form> -->
+
+{% endblock %}
