@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+import requests
 from django.http import HttpResponse
 from . models import Document, Tag
 from django.views.generic.list import ListView
@@ -67,11 +68,31 @@ def Tag_view(request, doc_id):
         if form.is_valid():
             document = Document.objects.filter(doc_id = doc_id)
 
-            tag_name = form.cleaned_data['tag_name']
+            query = form.cleaned_data['tag_name']
+            api_url = "https://www.wikidata.org/w/api.php"
+
+            params = {
+                'action': 'wbsearchentities',
+                'format': 'json',
+                'language': 'en',
+                'search': query
+            }
+
+            result = requests.get(api_url, params = params)
+            try:
+                tag_name = tag = result.json()['searchinfo']['search']
+                tag_id = (result.json()['search'][0]["id"])
+                tag_url = (result.json()['search'][0]["url"])
+                tag = Tag(tag_name = tag_name, tag_url = tag_url)
+
+            except:
+                tag = Tag(tag_name = form.cleaned_data['tag_name'], tag_url = "")
+
+            #tag = Tag(tag_name = form.cleaned_data['tag_name'], tag_url = form.cleaned_data['tag_url'])
             # # tag_request_from_browser = form.cleaned_data['tag_key'].split(':')
             # # tag_key = tag_request_from_browser[0]
             # # tag_value = 'http://www.wikidata.org/wiki/' + tag_request_from_browser[1]
-            tag = Tag(tag_name = form.cleaned_data['tag_name'], tag_url = form.cleaned_data['tag_url'])
+            
             # tag = Tag(tag_key = tag_key,
             #         tag_value = tag_value
             #     )

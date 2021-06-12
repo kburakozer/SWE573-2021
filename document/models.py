@@ -12,7 +12,7 @@ class Tag(models.Model):
         return self.tag_name
 
     tag_name = models.CharField(max_length=2000)
-    tag_url = models.CharField(max_length=2000)
+    tag_url = models.CharField(max_length=2000, blank=True)
 
     #document = models.ForeignKey(to=Document, on_delete=models.CASCADE)
 

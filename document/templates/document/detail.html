@@ -39,8 +39,8 @@
 
             <h7>Tags: </h7>
             {% for item in object.tags.all  %}
-
-            <h7>{{ item.tag_name }}</h7>
+            <a href="{{ item.tag_url  }}">{{ item.tag_name}}</a>
+           
   
             {% endfor %}
             <br>
