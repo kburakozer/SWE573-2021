@@ -10,6 +10,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import Tag_form
+from .wikidata import tag_suggestion
 # Create your views here.
 
 # def index(request):
