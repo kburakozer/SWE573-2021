@@ -2,11 +2,19 @@
 
 
 {% block body %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
+
 
 <form method="POST">
+   
     {% csrf_token %}
+    
     {{form}}
-    {{doc_id}}
+
+   <br>
    <br>
     <button type="submit">Save</button>
     
@@ -14,10 +22,42 @@
 
 
 
-<!-- <form method="POST">
+<!-- <form  method="post">
     {% csrf_token %}
-    <input type="hidden" value="{{ item.id }}" name="tag_id">
-    <button type="Submit">X</button>
+    
+    <label for="tag_name"><b></b></label>
+    <input type="text" placeholder="Search tag from Wikidata.." name="tag_name" id="id_tag_name" class="w3-left-align w3-button w3-white w3-border w3-border-teal w3-round-xxlarge w3-hover-gray" style="width:60%">
+
+    
+    <input type="submit" value="Add" class="w3-teal w3-button w3-round-xxlarge" style="width:10%">
+    </div>
 </form> -->
+
+
+
+<script type="text/javascript">
+    jQuery(function() {
+        $("#id_tag_name").on('keyup', function(){
+            let value = $(this).val();
+            $.ajax({
+                url: "{% url 'document:ajax_completion' %}",
+                data: {
+                'query': value 
+                },
+                dataType: 'json',
+                success: function (data) {
+                    let tags = data.tag_suggestions;
+                    $("#id_tag_name").autocomplete({
+                    source: tags,
+                    minLength: 2 
+                    });       
+                }
+            });        
+        });
+    });
+</script>
+
+
+
 
 {% endblock %}

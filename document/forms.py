@@ -1,11 +1,16 @@
 from django import forms
 from .models import Tag
+from dal import autocomplete
+
 
 class Tag_form(forms.ModelForm):
-     class Meta:
+    custom_tag = forms.CharField(max_length=50, empty_value="")
+    class Meta:
         model = Tag
-        fields = '__all__'
+        fields = ['tag_name']
         widgets = {
-            'tag_name':forms.TextInput(attrs={'class':'form-control'}),
-            'tag_url':forms.TextInput(attrs={'class':'form-control'}),        
+            'tag_name':forms.TextInput(attrs={'size': '40'}),      
         }
+    
+
+
