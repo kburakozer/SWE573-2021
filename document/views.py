@@ -38,8 +38,6 @@ class Search(ListView):
         query = self.request.GET.get("q")
         # object_list = Document.objects.filter(title__search=query)
         
-
-
         vector = SearchVector('tags', weight='A') + SearchVector('title', weight='B') + SearchVector('keywords', weight='C') + SearchVector('tokens', weight='D')
         query2 = SearchQuery(query)
         
