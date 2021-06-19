@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 import requests
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from . models import Document, Tag
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
@@ -11,14 +11,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import Tag_form
 from . wikidata import Tag_suggestion
-from dal import autocomplete
 
 # Create your views here.
 
-# def index(request):
-#     return HttpResponse("Hello my friend")
-
-
+# home page view
 class IndexClassView(ListView):
     model = Document;
     template_name = 'document/document.html'
@@ -28,12 +24,12 @@ class IndexClassView(ListView):
 
         
 
-
+# document detail view
 class DocDetailView(DetailView):
     model = Document;
     template_name = 'document/detail.html'
 
-
+# implements search
 class Search(ListView):
     model = Document;
     template_name = 'document/search_result.html'
@@ -43,11 +39,13 @@ class Search(ListView):
         # object_list = Document.objects.filter(title__search=query)
         
 
-        vector = SearchVector('title', weight='A') + SearchVector('keywords', weight='B') + SearchVector('tokens', weight='C')
+
+        vector = SearchVector('tags', weight='A') + SearchVector('title', weight='B') + SearchVector('keywords', weight='C') + SearchVector('tokens', weight='D')
         query2 = SearchQuery(query)
-        object_list = Document.objects.annotate(rank=SearchRank(vector, query2, cover_density=True)).order_by('-rank')
+        
         object_list = Document.objects.annotate(distance=TrigramDistance('tokens', query2)).filter(distance__lte=0.3).order_by('distance')
-        object_list = Document.objects.annotate(search=SearchVector('title','keywords','tokens'),).filter(search=SearchQuery(query))
+        object_list = Document.objects.annotate(search=SearchVector('tags','title','keywords','tokens'),).filter(search=SearchQuery(query))
+        object_list = Document.objects.annotate(rank=SearchRank(vector, query2, cover_density=True)).order_by('-rank')
         
         return object_list
 
@@ -56,49 +54,50 @@ def Tag_view(request, doc_id):
     if request.method =='POST':
         form = Tag_form(request.POST)
         
-        
-        # if form.is_valid():
-        #     document = Document.objects.filter(doc_id = doc_id)
-
-        #     query = form.cleaned_data['tag_name']
-        #     api_url = "https://www.wikidata.org/w/api.php"
-
-        #     params = {
-        #         'action': 'wbsearchentities',
-        #         'format': 'json',
-        #         'language': 'en',
-        #         'search': query
-        #     }
-
-        #     result = requests.get(api_url, params = params)
-            # try:
-            #     tag_name = tag = result.json()['searchinfo']['search']
-            #     tag_id = (result.json()['search'][0]["id"])
-            #     tag_url = (result.json()['search'][0]["url"])
-            #     tag = Tag(tag_name = tag_name, tag_url = tag_url)
-
-            # except:
-            #     tag = Tag(tag_name = form.cleaned_data['tag_name'], tag_url = "")
-
-
-            # tag.save()
-            # if len(document) > 1:
-            #     document[0].tags.add(tag)
-            #     document[1].tags.add(tag)
-
-            # else:
-            #     document.tags.add(tag)
-            # # TODO Httpresponseredirect
-            # return HttpResponse('/thanks')
-
         if form.is_valid():
             document = Document.objects.filter(doc_id = doc_id)
-            requested_tag = form.cleaned_data('tag_name')
-            tag_name = requested_tag
+            tag_str= form.cleaned_data['tag_name']
+            tag_list = tag_str.split(' - ')
+            tag_name = tag_list[1]
+            custom_tag = form.cleaned_data['custom_tag']
+            url = ""
+            if len(tag_name) != 0 and len(custom_tag) != 0: 
+                tag_name = custom_tag.lower()
+                tag_url = ""
+                try:
+                    tag_url = 'http://www.wikidata.org/wiki/' + tag_list[0]
+                except:
+                    pass
+                tag = Tag(tag_name = tag_name, tag_url = tag_url)
+                tag.save()
+                if len(document) > 1:
+                    document[0].tags.add(tag)
+                    document[1].tags.add(tag)
+                else:
+                    document.tags.add(tag)              
             
-
-            return result
-
+            elif len(tag_name) >=1:
+                tag_url = ""
+                try:
+                    tag_url = 'http://www.wikidata.org/wiki/' + tag_list[0]
+                except:
+                    pass
+                tag = Tag(tag_name = tag_name.lower(), tag_url = tag_url)
+                tag.save()
+                if len(document) > 1:
+                    document[0].tags.add(tag)
+                    document[1].tags.add(tag)
+                    prim_key = document[0].pk
+                    url = '/' +  str(prim_key) + '/'
+                else:
+                    document.tags.add(tag)
+                    prim_key = document.pk
+                    url = '/' +  str(prim_key) + '/'
+                
+                
+                return redirect(url)
+            else:
+                pass
     else:
         form = Tag_form()
 
@@ -120,10 +119,6 @@ def register(request):
 
 
 
-# class Autocompletion(autocomplete.Select2ListView):
-#     def get_tags(self):
-#         suggested_tags = Tag_suggestion.get_label(self.query)
-#         return suggested_tags
 
 
 def autocompletion(request):
@@ -134,11 +129,3 @@ def autocompletion(request):
             'tag_suggestions':tag_suggestions,
         }
         return JsonResponse(data)
-
-
-# def tagsList(request):
-
-#     tag_list = Tag.objects.all()
-
-#     return render(request, 'tagpubDev/tagList.html',
-#                   {'tag_list': tag_list})
