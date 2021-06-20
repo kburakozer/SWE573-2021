@@ -8,6 +8,7 @@ class Test_models(TestCase):
     def setUp(self):
         self.test_tag = Tag.objects.create(tag_name="brain")
         self.test_tag2 = Tag.objects.create(tag_name="emotion")
+        self.test_tag3 = Tag.objects.create(tag_name="emotion")
         self.wiki_api = "https://www.wikidata.org/w/api.php"
         self.query = "emotion"
 
@@ -24,8 +25,10 @@ class Test_models(TestCase):
                                             )
         self.document.tags.set([self.test_tag,self.test_tag2])
 
+
     # test document str function
     def test_doc_str(self):
+        
         self.assertEqual(str(self.document), "Iranian superwomen's career experiences: a qualitative study.")
 
     # tests tag creation
@@ -37,6 +40,7 @@ class Test_models(TestCase):
     def test_tag_doc(self):
         self.assertEqual(self.document.tags.count(), 2)
 
+    # tests autocompletion
     def test_tag_suggestion(self):
                 
 

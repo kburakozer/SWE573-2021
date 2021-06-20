@@ -187,6 +187,12 @@ def create_db():
 
     return query_result
 
+def delete_duplicates():
+	documents = Document.objects.all()
+	doc_numbers =[]
 
-
-create_db()
+	for item in documents:
+		if item.doc_id not in doc_numbers:
+			doc_numbers.append(item.doc_id)
+		else:
+			item.delete()

@@ -36,24 +36,24 @@ class Search(ListView):
     paginate_by = 20
     def get_queryset(self):
         query = self.request.GET.get("q")
-        # object_list = Document.objects.filter(title__search=query)
-        
+       
         vector = SearchVector('tags', weight='A') + SearchVector('title', weight='B') + SearchVector('keywords', weight='C') + SearchVector('tokens', weight='D')
         query2 = SearchQuery(query)
         
         object_list = Document.objects.annotate(distance=TrigramDistance('tokens', query2)).filter(distance__lte=0.3).order_by('distance')
-        object_list = Document.objects.annotate(search=SearchVector('tags','title','keywords','tokens'),).filter(search=SearchQuery(query))
+        object_list = Document.objects.annotate(search=SearchVector('title','keywords','tokens'),).filter(search=SearchQuery(query))
         object_list = Document.objects.annotate(rank=SearchRank(vector, query2, cover_density=True)).order_by('-rank')
         
         return object_list
 
 @login_required      
 def Tag_view(request, doc_id):
+
     if request.method =='POST':
         form = Tag_form(request.POST)
         
         if form.is_valid():
-            document = Document.objects.filter(doc_id = doc_id)
+            document = Document.objects.get(doc_id = doc_id)
             tag_str= form.cleaned_data['tag_name']
             tag_list = tag_str.split(' - ')
             tag_name = tag_list[1]
@@ -67,13 +67,10 @@ def Tag_view(request, doc_id):
                 except:
                     pass
                 tag = Tag(tag_name = tag_name, tag_url = tag_url)
-                tag.save()
-                if len(document) > 1:
-                    document[0].tags.add(tag)
-                    document[1].tags.add(tag)
-                else:
-                    document.tags.add(tag)              
-            
+                tag.save()       
+                document.tags.add(tag)
+                prim_key = document.pk
+                url = '/' +  str(prim_key) + '/'
             elif len(tag_name) >=1:
                 tag_url = ""
                 try:
@@ -82,16 +79,9 @@ def Tag_view(request, doc_id):
                     pass
                 tag = Tag(tag_name = tag_name.lower(), tag_url = tag_url)
                 tag.save()
-                if len(document) > 1:
-                    document[0].tags.add(tag)
-                    document[1].tags.add(tag)
-                    prim_key = document[0].pk
-                    url = '/' +  str(prim_key) + '/'
-                else:
-                    document.tags.add(tag)
-                    prim_key = document.pk
-                    url = '/' +  str(prim_key) + '/'
-                
+                document.tags.add(tag)
+                prim_key = document.pk
+                url = '/' +  str(prim_key) + '/'
                 
                 return redirect(url)
             else:
