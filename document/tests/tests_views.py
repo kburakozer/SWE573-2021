@@ -38,7 +38,9 @@ class Test_views(TestCase):
         })
 
         self.assertEqual(response.status_code, 302 )
-        #self.assertEqual(self.document1.tags.first().tag_name, 'amygdala')
+
+
+
 
 
 

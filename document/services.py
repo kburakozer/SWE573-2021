@@ -24,14 +24,6 @@ def search(term, num_article):
 
 	return id_list
 
-
-	# for ids in range(0, len(id_list), 100):
-	# 	details_handle = Entrez.efetch(db="pubmed",id=id_list2[ids:ids+100], retmode="xml", rettype="abstract",retmax=100)
-	# 	details_xml = details_handle.read()
-	# 	details = xmltodict.parse(details_xml)
-	# 	article_list = details.get('PubmedArticleSet').get('PubmedArticle')
-	# 	details_handle.close()
-	# 	return article_list
 		
 def get_details(id_list):
 		Entrez.api_key = 'f949f78d21fff30c490ba1c886fd214ae708'
@@ -147,6 +139,7 @@ def tokenize(abstract):
 	abstract = re.sub(r'\S+com', '', abstract)
 	table = abstract.maketrans("", "", new_s)
 	abstract2 = abstract.translate(table)
+	
 	#creating token object
 	tokens = spacy_nlp(abstract)
 
